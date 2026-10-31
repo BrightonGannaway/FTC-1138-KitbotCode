@@ -77,8 +77,8 @@ public class StarterBotAuto extends OpMode
      * in the launch() function to only run the windmill servo when the motor is spinning fast
      * enough to make a successful throw.
      */
-    public final int LAUNCHER_TARGET_VELOCITY = 1250;
-    public final int LAUNCHER_MIN_VELOCITY = 1200;
+    public final int LAUNCHER_TARGET_VELOCITY = 3000;
+    public final int LAUNCHER_MIN_VELOCITY = 2700;
 
     /*
      * Here we capture a few variables used in driving the robot. DRIVE_SPEED and ROTATE_SPEED
@@ -177,6 +177,7 @@ public class StarterBotAuto extends OpMode
          */
         leftDrive.setDirection(DcMotor.Direction.FORWARD);
         rightDrive.setDirection(DcMotor.Direction.REVERSE);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         /*
          * Here we reset the encoders on our drive motors before we start moving.
@@ -263,7 +264,7 @@ public class StarterBotAuto extends OpMode
                 }
                 break;
             case DRIVE:
-                if(drive(DRIVE_SPEED, -120, DistanceUnit.MM, 2)){
+                if(drive(DRIVE_SPEED, 200, DistanceUnit.MM, 2)){
                     autonomousState = AutonomousState.COMPLETE;
                 }
                 break;
@@ -288,6 +289,7 @@ public class StarterBotAuto extends OpMode
                 leftDrive.getCurrentPosition(), rightDrive.getCurrentPosition());
         telemetry.addData("Motor Target Positions", "left (%d), right (%d)",
                 leftDrive.getTargetPosition(), rightDrive.getTargetPosition());
+        telemetry.addData("Flywheel rpm", "%.2f", launcher.getVelocity());
         telemetry.update();
     }
 

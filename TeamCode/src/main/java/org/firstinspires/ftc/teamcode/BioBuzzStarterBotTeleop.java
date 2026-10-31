@@ -73,8 +73,8 @@ public class BioBuzzStarterBotTeleop extends OpMode {
      * in the launch() function to only run the windmill servo when the motor is spinning fast
      * enough to make a successful throw.
      */
-    public final int LAUNCHER_TARGET_VELOCITY = 1250;
-    public final int LAUNCHER_MIN_VELOCITY = 1200;
+    public final int LAUNCHER_TARGET_VELOCITY = 1400;
+    public final int LAUNCHER_MIN_VELOCITY = 13`````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````50;
 
     /*
      * These two variables store the power we need to apply to the motors. In other cases, we may
@@ -188,7 +188,7 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * both motors work to rotate the robot. Combinations of these inputs can be used to create
          * more complex maneuvers.
          */
-        arcadeDrive(-gamepad1.left_stick_y, gamepad1.right_stick_x);
+        arcadeDrive(gamepad1.left_stick_y, gamepad1.right_stick_x);
 
         /*
          * Set the intake power variable to equal the right trigger, minus the left trigger.
@@ -203,7 +203,9 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * create erratic behavior.
          */
         // Two-driver setup: gamepad1 is the base driver, gamepad2 runs the intake and launcher.
-        intakePower = gamepad2.right_trigger - gamepad2.left_trigger;
+        intakePower = (gamepad2.right_bumper ? 1 : 0)
+        - gamepad2.right_trigger+(gamepad1.right_bumper ? 1 : 0)
+                - gamepad1.right_trigger;
 
         /*
          * The launch() function handles setting motor velocity, and running the windmill servo
@@ -220,21 +222,16 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          */
         // launch() can push intakePower to 1.5; keep it in the legal -1..1 range.
         intakePower = Range.clip(intakePower, -1, 1);
-        intake.setPower(intakePower);
+        intake.setPower(-intakePower);
 
         // gamepad2 d-pad: left/right arrow pulls in with that side's servo, down pushes both out to clear jams.
-        if (gamepad2.dpad_down) {
-            leftIntakeServo.setPower(-1);
-            rightIntakeServo.setPower(-1);
-        } else {
-            leftIntakeServo.setPower(gamepad2.dpad_left ? 1 : 0);
-            rightIntakeServo.setPower(gamepad2.dpad_right ? 1 : 0);
-        }
-
+        leftIntakeServo.setPower(intakePower);
+        rightIntakeServo.setPower(intakePower);
         /*
          * Show motor powers on the Driver Station via telemetry.
          */
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+        telemetry.addData("Flywheel rpm", "%.2f", launcher.getVelocity());
         telemetry.addLine();
 
     }
@@ -271,7 +268,7 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * holding down the right gamepad. If they are, then we want to start spinning up the launcher.
          * Otherwise, we start spinning the launcher down.
          */
-        if (gamepad2.right_bumper) {
+        if (gamepad2.left_bumper) {
             launcher.setVelocity(LAUNCHER_TARGET_VELOCITY);
         } else {
             launcher.setVelocity(0);
@@ -284,13 +281,13 @@ public class BioBuzzStarterBotTeleop extends OpMode {
          * add some power to the intake power. This can sometimes help dislodge stuck elements from
          * inside the hopper.
          */
-        if (gamepad2.right_bumper && launcher.getVelocity() > LAUNCHER_MIN_VELOCITY) {
+        /*if (gamepad2.right_bumper && launcher.getVelocity() > LAUNCHER_MIN_VELOCITY) {
             windmillServo.setPower(1);
             intakePower += 0.5;
-        } else if (gamepad2.a) {
+        } else */if (gamepad2.cross) {
             // Manual indexer: A advances elements, B backs them out to clear a jam.
             windmillServo.setPower(1);
-        } else if (gamepad2.b) {
+        } else if (gamepad2.circle) {
             windmillServo.setPower(-1);
         } else {
             windmillServo.setPower(0);
